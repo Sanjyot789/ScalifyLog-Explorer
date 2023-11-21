@@ -1,4 +1,4 @@
-# Log Search App
+# ScalifyLog Explorer
 
 ## Description
 
