@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Log Search</title>
+
+    <!-- Add some CSS framework like Bootstrap here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        #logs {
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Log Search</h1>
+
+    <div class="card">
+        <div class="card-body">
+
+            <form>
+
+                <div class="form-group row">
+                    <label for="level" class="col-sm-2 col-form-label">Level</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="level">
+                    </div>
+
+                    <label for="message" class="col-sm-2 col-form-label">Message</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="message">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="resourceId" class="col-sm-2 col-form-label">Resource ID</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="resourceId">
+                    </div>
+
+                    <label for="startdate" class="col-sm-2 col-form-label">Start Date</label>
+                    <div class="col-sm-4">
+                        <input type="date" class="form-control" id="startdate">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <label for="traceId" class="col-sm-2 col-form-label">Trace ID</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="traceId">
+                    </div>
+
+                    <label for="enddate" class="col-sm-2 col-form-label">End Date</label>
+                    <div class="col-sm-4">
+                        <input type="date" class="form-control" id="enddate">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="spanId" class="col-sm-2 col-form-label">Span ID</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="spanId">
+                    </div>
+
+
+
+                    <label for="commit" class="col-sm-2 col-form-label">Commit</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="commit">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="parentResourceId" class="col-sm-2 col-form-label">Parent Resource ID</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="parentResourceId">
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <div class="col-sm-2 offset-sm-5">
+                        <button type="button" class="btn btn-primary btn-block" onclick="queryLogs()">Search</button>
+                    </div>
+                </div>
+{#                <button type="button" class="btn btn-primary" onclick="queryLogs()">Search</button>#}
+
+            </form>
+
+        </div>
+    </div>
+
+    <div id="logs"></div>
+
+</div>
+
+<!-- Script tags here -->
+
+<script>
+    async function queryLogs() {
+        const level = document.getElementById('level').value;
+        const message = document.getElementById('message').value;
+        const resourceId = document.getElementById('resourceId').value;
+        const traceId = document.getElementById('traceId').value;
+        const spanId = document.getElementById('spanId').value;
+        const commit = document.getElementById('commit').value;
+        const parentResourceId = document.getElementById('parentResourceId').value;
+        const startdate = document.getElementById('startdate').value;
+        const enddate = document.getElementById('enddate').value;
+
+
+        const params = new URLSearchParams();
+        params.append('level', level);
+        params.append('message', message);
+        params.append('resourceId', resourceId)
+        params.append('traceId', traceId)
+
+        params.append('spanId', spanId)
+        params.append('commit', commit)
+        params.append('parentResourceId', parentResourceId)
+        params.append('startdate', startdate)
+        params.append('enddate', enddate)
+
+        const response = await fetch('/search?' + params);
+        const data = await response.json();
+
+        displayLogs(data);
+    }
+
+    function displayLogs(logs) {
+
+        const container = document.getElementById('logs');
+        container.innerHTML = '';
+
+        if (logs.data.length === 0) {
+            container.innerHTML = '<p>No logs found.</p>';
+            return;
+        }
+
+        // Create table
+        const table = document.createElement('table');
+        table.classList.add('table');
+
+        // Create head
+        const head = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        logs.columns.forEach(column => {
+            const th = document.createElement('th');
+            th.textContent = column;
+            headerRow.appendChild(th);
+        });
+
+        head.appendChild(headerRow);
+
+        // Create body
+        const body = document.createElement('tbody');
+
+        logs.data.forEach(row => {
+            const tr = document.createElement('tr');
+            row.forEach(cell => {
+                const td = document.createElement('td');
+                td.textContent = cell;
+                tr.appendChild(td);
+            });
+            body.appendChild(tr);
+        });
+
+        table.appendChild(head);
+        table.appendChild(body);
+
+        container.appendChild(table);
+
+    }
+</script>
+
+</body>
+</html>
